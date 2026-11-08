@@ -42,7 +42,7 @@ A cli to browse and watch anime (alone AND with friends). This tool scrapes the 
 - [Fixing errors](#fixing-errors)
 - [Install](#install)
   - [Tier 1: Linux, Mac, Android](#tier-1-support-linux-mac-android)
-  - [Tier 2: Windows, WSL, iOS, Steam Deck, FreeBSD, Ubuntu Touch](#tier-2-support-windows-wsl-ios-steam-deck-freebsd-ubuntu-touch)
+  - [Tier 2: Windows, WSL, iOS, Steam Deck, FreeBSD, NetBSD, Ubuntu Touch](#tier-2-support-windows-wsl-ios-steam-deck-freebsd-netbsd-ubuntu-touch)
   - [From Source](#installing-from-source)
 - [Uninstall](#uninstall)
 - [Dependencies](#dependencies)
@@ -187,7 +187,7 @@ VLC on Android cannot be given the referrer, so it does not play the current pro
 
 </details>
 
-### Tier 2 Support: Windows, WSL, iOS, Steam Deck, FreeBSD, Ubuntu Touch
+### Tier 2 Support: Windows, WSL, iOS, Steam Deck, FreeBSD, NetBSD, Ubuntu Touch
 
 *While officially supported, installation is more involved on these platforms and sometimes issues arise. \
 Reach out if you need help.*
@@ -427,6 +427,47 @@ install from source:
 ```sh
 git clone "https://github.com/pystardust/ani-cli.git"
 sudo cp ani-cli/ani-cli /usr/local/bin
+rm -rf ani-cli
+```
+
+</details>
+
+<details><summary><b>NetBSD</b></summary>
+
+*Note: run these as root.*
+
+#### Copypaste script:
+
+```sh
+pkgin install curl mpv fzf yt-dlp git-base
+git clone "https://github.com/pystardust/ani-cli.git"
+mkdir -p /usr/local/bin
+cp ani-cli/ani-cli /usr/local/bin
+rm -rf ani-cli
+```
+
+#### Installation in steps:
+
+##### Install dependencies:
+
+```sh
+pkgin install curl mpv fzf yt-dlp
+```
+
+##### Install ani-cli:
+
+install git if you haven't already
+
+```sh
+pkgin install git-base
+```
+
+install from source:
+
+```sh
+git clone "https://github.com/pystardust/ani-cli.git"
+mkdir -p /usr/local/bin
+cp ani-cli/ani-cli /usr/local/bin
 rm -rf ani-cli
 ```
 
