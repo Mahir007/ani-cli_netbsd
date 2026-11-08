@@ -1,0 +1,50 @@
+name: ci
+on:
+  push:
+    paths-ignore: ['**.md', LICENSE]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  UPSTREAM_URL: https://raw.githubusercontent.com/pystardust/ani-cli/master/ani-cli
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: shellcheck -s sh -e SC2016,SC2012 netbsd-fix.sh tests/test.sh
+      - run: docker run --rm -v "$PWD:/repo" -w /repo mvdan/shfmt:v3.14.1 -i 4 -ci -d netbsd-fix.sh tests/test.sh
+      - run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12 -color
+
+  test-linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: curl -fsSL -o ani-cli.upstream "$UPSTREAM_URL"
+      - run: sh tests/test.sh ani-cli.upstream
+
+  test-netbsd:
+    name: test-netbsd (${{ matrix.release }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        release: ['10.1', '11.1']
+    steps:
+      - uses: actions/checkout@v4
+      - run: curl -fsSL -o ani-cli.upstream "$UPSTREAM_URL"
+      - uses: vmactions/netbsd-vm@v1.5.3
+        with:
+          release: ${{ matrix.release }}
+          usesh: true
+          run: sh tests/test.sh ani-cli.upstream
