@@ -1,6 +1,6 @@
 #!/bin/sh
 
-version_number="5.1.7"
+version_number="5.1.8"
 
 # UI
 
@@ -182,11 +182,11 @@ b64_decode() {
 # the embed page ships its config as base64(json XOR "otaku-embed-v1"), this prints the json.
 # runs in a subshell so the key bytes can live in the positional parameters and rotate with shift.
 deobfuscate_blob() (
-    _bytes="$(b64_decode "$1" | od -v -An -tu1)"
+    _bytes="$(b64_decode "$1" | od -v -An -tx1)"
     set -- 111 116 97 107 117 45 101 109 98 101 100 45 118 49
     _output=""
     for _byte in $_bytes; do
-        _char=$((_byte ^ $1))
+        _char=$((0x$_byte ^ $1))
         _output="${_output}\\0$((_char + 2 * (_char / 8) + 20 * (_char / 64)))"
         shift
         if [ "$#" -eq 0 ]; then
@@ -240,7 +240,7 @@ hianime_m3u8() {
     sub_link="$(printf "%s" "$_json" | sed 's|.*"subtitles":\[||; s|}\].*||; s|},{|}\n{|g' | grep -m 1 '"default":true' | sed -nE 's|.*"src":"([^"]*)".*|\1|p')"
     _playlist="$(hianime_curl "$_m3u8_master" -e "$refr")"
     # quality variants are relative to the master playlist
-    links="$(printf "%s\n" "$_playlist" | sed 's|^#EXT-X-STREAM.*x||g; s|,.*|p|g; /^#/d; $!N; s|\n| >|;/EXT-X-I-FRAME/d' | sed "\|>https*://|!s|>|>${_m3u8_master%/*}/|" | sort -g -r -s)"
+    links="$(printf "%s\n" "$_playlist" | sed 's|^#EXT-X-STREAM.*x||g; s|,.*|p|g; /^#/d; $!N; s|\n| >|;/EXT-X-I-FRAME/d' | sed "\|>https*://|!s|>|>${_m3u8_master%/*}/|" | sort -n -r -s)"
     audio_link="$(printf "%s\n" "$_playlist" | sed -nE '/^#EXT-X-MEDIA:TYPE=AUDIO,.*DEFAULT=YES/{s|.*URI="([^"]*)".*|\1|p;q;}' | sed "\|^https*://|!s|^|${_m3u8_master%/*}/|")"
     [ -n "$links" ]
 }
